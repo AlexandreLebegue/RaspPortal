@@ -31,24 +31,21 @@ while 1:
   # 5) Dialogue avec le client :
   msgServeur ="VIDEO"
   connexion.send(msgServeur.encode("Utf8"))
-  msgClient = connexion.recv(1024).decode("Utf8")
   v = video_server_thread()
-  video_stream = False
   while 1:
+    print ("Waiting msg ...")
+    msgClient = connexion.recv(1024).decode("Utf8")
     print("C>", msgClient)
-    if msgClient.upper() == "VIDEORESP" and  not video_stream:
-        video_stream = True
+    if msgClient.upper() == "VIDEORESP":
         v.start()
+    elif msgClient.upper() == "VIDEORESPSTOP":
+        v.exit()
+    elif msgClient.upper() == "QUITRESP":
+        print("Connexion interrompue.")
+        connexion.close()
+        break
 
     msgServeur = input("S> ")
     connexion.send(msgServeur.encode("Utf8"))
-    msgClient = connexion.recv(1024).decode("Utf8")
 
-  # 6) Fermeture de la connexion :
-  connexion.send("fin".encode("Utf8"))
-  print("Connexion interrompue.")
-  connexion.close()
-
-  ch = input("<R>ecommencer <T>erminer ? ")
-  if ch.upper() =='T':
-      break
+Print("END.")

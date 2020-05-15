@@ -9,6 +9,7 @@ from threading import Thread
 
 
 class video_client_thread(Thread):
+
     def __init__(self): # Notre méthode constructeur
         print("video_client_thread")
         Thread.__init__(self)

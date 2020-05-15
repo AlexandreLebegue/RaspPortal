@@ -20,23 +20,32 @@ except socket.error:
 print("Connexion établie avec le serveur.")
 
 # 3) Dialogue avec le serveur :
-msgServeur = mySocket.recv(1024).decode("Utf8")
 v = video_client_thread()
 video_stream = False
+
+
 while 1:
-  if msgServeur.upper() == "VIDEO" and not video_stream:
-      video_stream = True
+  print ("Waiting msg ...")
+  msgServeur = mySocket.recv(1024).decode("Utf8")
+  print("S>", msgServeur)
+  if msgServeur.upper() == "VIDEO":
       msgClient = "VIDEORESP"
       mySocket.send(msgClient.encode("Utf8"))
 
       v.start()
-
-  else:
-      print("S>", msgServeur)
+  elif msgServeur.upper() == "VIDEOSTOP":
+      msgClient = "VIDEORESPSTOP"
+      mySocket.send(msgClient.encode("Utf8"))
+      v.exit()
+  elif msgServeur.upper() == "QUIT":
+      msgClient = "QUITRESP"
+      mySocket.send(msgClient.encode("Utf8"))
+      mySocket.close()
+      # 4) Fermeture de la connexion :
+      print("Connexion interrompue.")
+      break
+  else :
       msgClient = input("C> ")
       mySocket.send(msgClient.encode("Utf8"))
-      msgServeur = mySocket.recv(1024).decode("Utf8")
 
-# 4) Fermeture de la connexion :
-print("Connexion interrompue.")
-mySocket.close()
+print("END.")
