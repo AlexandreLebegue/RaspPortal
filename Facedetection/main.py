@@ -61,6 +61,7 @@ while True:
     yellowLed.off()
     print("Waiting button pressed ...")
     launchButton.wait_for_press() #attente passive... ?
+    #input("enter to simulate press button")
     print("Button pressed, launching detection ...")
 
     #Launching face detection

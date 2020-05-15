@@ -95,16 +95,14 @@ def main():
     counter +=1
     print("Client connecté, adresse IP %s, port %s" % (adresse[0], adresse[1]))
 
-    # 5) Dialogue avec le client :
-    msgServeur ="VIDEO"
-    connexion.send(msgServeur.encode("Utf8"))
+
 
 
     while 1:
         print ("Waiting msg ...")
         msgClient = connexion.recv(1024).decode("Utf8")
         print("C>", msgClient)
-        if msgClient.upper() == "VIDEORESP":
+        if msgClient.upper() == "VIDEO":
             v = Thread(target  = VideoStream, args =(10, ))
             v.start()
         elif msgClient.upper() == "VIDEORESPSTOP":

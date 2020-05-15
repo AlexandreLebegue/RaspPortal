@@ -10,6 +10,11 @@ import struct
 import time
 import pickle
 import zlib
+import face_recognition
+import detection
+import time
+from gpiozero import Button
+from gpiozero import LED
 
 from threading import Thread
 
@@ -68,29 +73,85 @@ def main() :
     video_stream = False
 
 
+    #Facedetection Init
+
+    YELLOPIN = 17
+    REDPIN = 27
+    GREENPIN = 22
+    BUTTONPIN = 2
+
+
+
+    print("Initialize")
+    #Face Detection INIT
+    cap = cv2.VideoCapture(0)
+
+    alexandre_face = face_recognition.load_image_file("data/alexandre.jpeg")
+    alexandre_face_encoding = face_recognition.face_encodings(alexandre_face)[0]
+
+    sarah_face = face_recognition.load_image_file("data/sarah.jpg")
+    sarah_face_encoding = face_recognition.face_encodings(sarah_face)[0]
+
+    mama_face = face_recognition.load_image_file("data/maman.jpg")
+    mama_face_encoding = face_recognition.face_encodings(mama_face)[0]
+
+    papa_face = face_recognition.load_image_file("data/papa.jpg")
+    papa_face_encoding = face_recognition.face_encodings(papa_face)[0]
+
+    known_faces = [
+        alexandre_face_encoding,
+        sarah_face_encoding,
+        mama_face_encoding,
+        papa_face_encoding
+    ]
+
+    isFacedetected = False
+
+    # Initialize some variables
+    face_locations = []
+    face_encodings = []
+    face_names = []
+    frame_number = 0
+
+    #GPIO INIT
+
+    launchButton = Button(BUTTONPIN)
+    yellowLed = LED(YELLOPIN)
+    redLed = LED(REDPIN)
+    greenLed = LED(GREENPIN)
+
+
     while 1:
-      print ("Waiting msg ...")
-      msgServeur = mySocket.recv(1024).decode("Utf8")
-      print("S>", msgServeur)
-      if msgServeur.upper() == "VIDEO":
-          msgClient = "VIDEORESP"
-          mySocket.send(msgClient.encode("Utf8"))
-          v = Thread(target  = VideoStream, args =(10, ))
-          v.start()
-      elif msgServeur.upper() == "VIDEOSTOP":
-          msgClient = "VIDEORESPSTOP"
-          mySocket.send(msgClient.encode("Utf8"))
-          v.exit()
-      elif msgServeur.upper() == "QUIT":
-          msgClient = "QUITRESP"
-          mySocket.send(msgClient.encode("Utf8"))
-          mySocket.close()
-          # 4) Fermeture de la connexion :
-          print("Connexion interrompue.")
-          break
-      else :
-          msgClient = input("C> ")
-          mySocket.send(msgClient.encode("Utf8"))
+        isFacedetected = False
+        redLed.off()
+        greenLed.off()
+        yellowLed.off()
+        print("Waiting button pressed ...")
+        launchButton.wait_for_press() #attente passive... ?
+        #input("enter to simulate press button")
+        #Launching face detection
+        yellowLed.on()
+        redLed.off()
+        greenLed.off()
+
+        for i in range(5):
+            result = detection.detect(known_faces, cap)
+            if result[0]:
+                isFacedetected = result[0]
+                name = result[1]
+        #End Of detection...
+
+        #Treatement
+        if isFacedetected:
+            greenLed.on()
+            print(name)
+        else:
+            redLed.on()
+            v = Thread(target  = VideoStream, args =(10, ))
+            v.start()
+            msgClient = "VIDEO"
+            mySocket.send(msgClient.encode("Utf8"))
+
 
 
 
