@@ -35,6 +35,9 @@ def VideoStream(duration):
     #print("payload_size: {}".format(payload_size))
     start = time.time()
     timer = 0
+
+    cv2.namedWindow("imgawindow", cv2.WND_PROP_FULLSCREEN)
+    cv2.setWindowProperty("imgawindow",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
     while timer < duration:
         while len(data) < payload_size:
             #print("Recv: {}".format(len(data)))
@@ -52,11 +55,12 @@ def VideoStream(duration):
 
         frame=pickle.loads(frame_data, fix_imports=True, encoding="bytes")
         frame = cv2.imdecode(frame, cv2.IMREAD_COLOR)
-        cv2.imshow('ImageWindow',frame)
+        cv2.imshow('imgawindow',frame)
         cv2.waitKey(1)
         timer = time.time() - start
 
-    cv2.destroyAllWindows()
+    cv2.destroyWindow("imgawindow")
+
     s.close()
     print("Quitting thread")
 
@@ -65,6 +69,11 @@ def main():
     HOST = '127.0.0.1'
     PORT = 8585
     counter =0	 # compteur de connexions actives
+    cv2.namedWindow("window", cv2.WND_PROP_FULLSCREEN)
+    cv2.setWindowProperty("window",cv2.WND_PROP_FULLSCREEN,cv2.WINDOW_FULLSCREEN)
+    img = cv2.imread('fond_ecran.jpg',0)
+    cv2.imshow('window',img)
+    cv2.waitKey(1)
 
     # 1) création du socket :
     mySocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
